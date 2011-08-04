@@ -1,0 +1,127 @@
+#{extends 'main.html' /}
+#{set title:'イベントマップ' /}
+
+#{set titleLine:titleLine /}
+#{set events:events /}
+
+#{set 'moreScripts'}
+  <script src="http://maps.google.co.jp/maps?hl=ja&amp;file=api&amp;v=2.x&amp;key=ABQIAAAAknUhcyPuZTdkQ52Nlgkx5RR0Qad0_3iwXrW4Sn_l7SVK4YS_zhQGd5p2nABYBUsJb9mZy9ZI2IJhqw" type="text/javascript"></script>
+  <!-- script src="http://maps.google.co.jp/maps?hl=ja&amp;file=api&amp;v=2.x&amp;key=ABQIAAAAknUhcyPuZTdkQ52Nlgkx5RTnrtoh691M2ul-v6DCdlXTDjQG1xQEfJnZEsTpQu0r1YUSYyqBv3ihrQ" type="text/javascript"></script-->
+  <script type="text/javascript">
+
+    var map = null;
+    var geocoder = null;
+    var pointFirst = null;
+
+    function initialize() {
+      if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById("map_canvas"));
+        geocoder = new GClientGeocoder();
+	var i = 0;
+        #{list items:events, as:'event'}
+          showAddress('${event.location}', '${event.getMarkerText()}', i++);
+        #{/list}
+      }
+    }
+
+    function showAddress(address, title, i) {
+      if (geocoder) {
+        geocoder.getLatLng(
+          address,
+          function(point) {
+            if (!point) {
+              alert(address + " not found");
+            } else {
+	      if (i == 0) {
+		map.setCenter(point, 13);
+                pointFirst = point;
+              }
+              map.addOverlay(createMarker(point, i, title));
+            }
+          }
+        );
+      }
+    }
+
+    function centering() {
+      map.setCenter(pointFirst, 13);
+    }
+
+    // Create a base icon for all of our markers that specifies the
+    // shadow, icon dimensions, etc.
+    var baseIcon = new GIcon(G_DEFAULT_ICON);
+    baseIcon.shadow = "http://www.google.com/mapfiles/shadow50.png";
+//    baseIcon.iconSize = new GSize(20, 34);
+    baseIcon.iconSize = new GSize(30, 51);
+    baseIcon.shadowSize = new GSize(37, 34);
+//    baseIcon.iconAnchor = new GPoint(9, 34);
+    baseIcon.iconAnchor = new GPoint(18, 51);
+    baseIcon.infoWindowAnchor = new GPoint(9, 2);
+
+    // Creates a marker whose info window displays the letter corresponding
+    // to the given index.
+    function createMarker(point, index, text) {
+      // Create a lettered icon for this point using our icon class
+      var letter = String.fromCharCode("A".charCodeAt(0) + index);
+      var letteredIcon = new GIcon(baseIcon);
+      letteredIcon.image = "http://www.google.com/mapfiles/marker" + letter + ".png";
+
+      // Set up our GMarkerOptions object
+      markerOptions = { icon:letteredIcon };
+      var marker = new GMarker(point, markerOptions);
+
+      GEvent.addListener(marker, "click", function() {
+        marker.openInfoWindowHtml("<b>" + letter + "</b> " + text);
+      });
+      return marker;
+    }
+  </script>
+#{/set}
+
+  <body onload="initialize()" onunload="GUnload()">
+
+<table width="80%">
+  <tr>
+    <td>${titleLine}</td>
+    <td>
+      <table>
+	<tr>
+	  <td>
+	    <form action="@{index}"><input method="post" type="submit" value="今日"><input type="hidden" name="pDate" value=""></form>
+	  </td>
+	  <td>
+	    <form action="@{index}"><input method="post" type="submit" value="翌日"><input type="hidden" name="pDate" value="${nextDate}"></form>
+	  </td>
+	</tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+#{if message != ""}
+  <p> ${message} </p>
+  <hr />
+#{/if}
+
+#{if events.isEmpty()}
+  <p>No Events</p>
+#{/if}
+#{else}
+  <table border="0" cellpadding="1" sellspacing="1">
+    <tr><th>名称</th><th>場所</th><th>時間</th></tr>
+  #{list items:events, as:'event'}
+    <tr>
+      <th>${event.title}</th><td>${event.location}</td><td>${event.getTime()}</td>
+    </tr>
+  #{/list}
+  </table>
+#{/else}
+
+<hr/>
+
+  <div id="map_canvas" style="width: 80%; height: 800px"></div>
+
+  <form>
+    <input type="submit" value="センタリング" onclick="centering()">
+  </form>
+</body>

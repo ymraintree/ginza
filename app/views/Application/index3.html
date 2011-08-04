@@ -1,0 +1,36 @@
+#{extends 'main.html' /}
+#{set title:'メンテナンス' /}
+
+#{if message != ""}
+  <p> ${message} </p>
+#{/if}
+<hr />
+
+#{if events.isEmpty()}
+  <p>No Events</p>
+#{/if}
+#{else}
+  #{list items:events, as:'item'}
+    <li>
+      ${item.title} ${item.location} ${item.date} ${item.fromTime}から${item.toTime}まで
+      <a href="@{index3(null, item.id)}">編集</a>
+      <a href="@{deleteEvent(item.id)}">削除</a>
+      <a href="@{index(item.date)}">確認</a>
+    </li>
+  #{/list}
+#{/else}
+
+<hr/>
+
+<form action="@{updateEvent}">
+  <input type="hidden" name="event.id" value="${event.id}"/>
+  <div>Title: <input type="text" name="event.title" size="30" value="${event.title}"/></div>
+  <div>Location: <input type="text" name="event.location" size="60" value="${event.location}"/></div>
+  <div>Date: <input type="text" name="event.date" size="15" value="${event.dateFormatted()}"/>
+    <input type="text" name="event.fromTime" size="10" value="${event.fromTime}"/>から
+    <input type="text" name="event.toTime" size="10" value="${event.toTime}"/>まで
+  </div>
+  <input type="submit" name="update" value="更新">
+  <input type="submit" name="register" value="新規登録">
+</form>
+

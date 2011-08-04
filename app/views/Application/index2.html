@@ -1,0 +1,32 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+#{if message != ""}
+  <p> ${message} </p>
+  <hr />
+#{/if}
+
+#{if events.isEmpty()}
+  <p>No Events</p>
+#{/if}
+#{else}
+  #{list items:events, as:'event'}
+    <li>
+      <input type="checkbox" name="id" value="${event.id}"/>
+      ${event.id} ${event.title} ${event.location} ${event.date} ${event.fromTime}から${event.toTime}まで
+      <a href="@{editEvent(event.id)}">編集</a>
+      <a href="@{deleteEvent(event.id)}">削除</a>
+    </li>
+  #{/list}
+#{/else}
+
+<hr/>
+<form action="@{createEvent}">
+  <div>Title: <input type="text" name="title" size="30"/></div>
+  <div>Location: <input type="text" name="location" size="60"/></div>
+  <div>Date: <input type="text" name="date" size="15"/>
+    <input type="text" name="event.fromTime" size="10" value="${event.fromTime}"/>から
+    <input type="text" name="event.toTime" size="10" value="${event.toTime}"/>まで
+  </div>
+  <input type="submit" value="送信">  <input type="reset" value="取消">
+</form>

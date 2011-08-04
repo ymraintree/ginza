@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Google 地図 JavaScript API 使用例: 簡単なジオコーディング</title>
+    <script src="http://maps.google.co.jp/maps?hl=ja&amp;file=api&amp;v=2.x&amp;key=ABQIAAAAknUhcyPuZTdkQ52Nlgkx5RR0Qad0_3iwXrW4Sn_l7SVK4YS_zhQGd5p2nABYBUsJb9mZy9ZI2IJhqw" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    var map = null;
+    var geocoder = null;
+
+    function initialize() {
+      if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById("map_canvas"));
+        map.setCenter(new GLatLng(35.664694, 139.700016), 13);
+        geocoder = new GClientGeocoder();
+      }
+    }
+
+    function showAddress(address) {
+      if (geocoder) {
+        geocoder.getLatLng(
+          address,
+          function(point) {
+            if (!point) {
+              alert(address + " not found");
+            } else {
+              map.setCenter(point, 13);
+              var marker = new GMarker(point);
+              map.addOverlay(marker);
+              marker.openInfoWindowHtml(address);
+            }
+          }
+        );
+      }
+    }
+    </script>
+  </head>
+
+  <body onload="initialize()" onunload="GUnload()">
+    <form action="#" onsubmit="showAddress(this.address.value); return false">
+      <p>
+        <input type="text" size="60" name="address" value="東京都渋谷区桜丘町 ２６－１" />
+        <input type="submit" value="検索" />
+      </p>
+      <div id="map_canvas" style="width: 500px; height: 300px"></div>
+    </form>
+
+  </body>
+</html>
+
